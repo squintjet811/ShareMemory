@@ -5,7 +5,6 @@ import time
 import os.path
 import os
 
-
 class ShareMemWriter(object):
 
     def __init__(self, mem_file_size = 1280 * 1280, mode = 1):
@@ -53,7 +52,6 @@ class ShareMemWriter(object):
             size = os.path.getsize(self.mmap_path)
             print("create file size of ", size)
 
-
         self.open_memory_mapping_file()
 
     def calibrate_int_size(self):
@@ -78,7 +76,6 @@ class ShareMemWriter(object):
     def check_mem_exists(self):
 
         result = os.path.isfile(self.mmap_path)
-
         return result
 
     def create_mapping(self):
@@ -90,13 +87,11 @@ class ShareMemWriter(object):
         self.mm_handle.write(b"hello world")
         self.mm_handle.flush()
 
-
     def read_data_header(self):
 
         cur_wbyte = int(str(self.mm_handle.read(1)))
         cur_rbyte = int(str(self.mm_handle.read(1)))
         cur_ndbyte = int(str(self.mm_handle.read(1)))
-
 
         return 0
 
@@ -176,9 +171,6 @@ class ShareMemWriter(object):
         data_buffer = ctypes.cast(data, ctypes.POINTER(ctypes.c_int32))
         return data_buffer
 
-
-
-
     def write_data(self, data):
 
         self.write_data_header()
@@ -232,8 +224,6 @@ class ShareMemWriter(object):
     def close(self):
 
         self.mm_handle.close()
-
-
 
 class ShareMemReader(object):
 
