@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 setup(name = 'ShareMemory',
@@ -8,7 +8,16 @@ setup(name = 'ShareMemory',
       author = 'squintjet811',
       author_email = 'squintjet811@gmail.com',
       license = 'MIT',
-      packages = ['ShareMemory'],
-      install_requires = ['numpy'],
+      packages = find_packages("src"),
+      install_requires = ['numpy == 1.15.4'],
+      package_data = {
+           'doc' :['*.txt'] ,
+           'memorymapfile' : ['*.txt'] ,
+            '' : ['*.md'],
+      },
+
+      #include_package_data = True,
+
       zip_safe = False)
+
 

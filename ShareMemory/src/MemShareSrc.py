@@ -13,7 +13,6 @@ class ShareMemWriter(object):
         self.mmap_path = None #memory map path
         # pull mode
         self.mode = mode
-
         self.input_data = None #input data
         self.mm_handle = None #mmap handle
 
@@ -29,6 +28,22 @@ class ShareMemWriter(object):
         self.mem_file_size = mem_file_size
         self.calibrate_all()
 
+    def decode_byte(self, my_byte):
+
+        my_string = str(my_byte.decode("utf_8"))
+        print("my_string is", my_string)
+        my_val = int(my_string)
+
+        return my_val
+
+    def buffer_2_int(self, buffer):
+
+        data_byte = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_int32))
+        data_int = data_byte.contents.value
+        print("data_byte", data_byte)
+
+        return data_int
+
     def calibrate_all(self):
 
         self.get_curr_path()
@@ -36,6 +51,64 @@ class ShareMemWriter(object):
         self.calibrate_memorymappingfile()
         self.create_mapping()
 
+    def read_wbyte(self):
+
+        self.mm_handle.seek(1 + self.int_size * 2)
+
+        val = self.mm_handle.read(1)
+
+        int_val = self.decode_byte(val)
+        print("read from wbyte ----------------")
+
+        #print("read from wbyte : ", int_val)
+        print("read from wbyte : ", val)
+
+        return int_val
+
+    def read_rbyte(self):
+
+        self.mm_handle.seek(2 + self.int_size * 2)
+
+        val = self.mm_handle.read(1)
+
+        int_val = self.decode_byte(val)
+
+        print("read from rbyte : ", int_val)
+
+        print("read from rbyte : ", val)
+
+        return int_val
+
+    def read_ndbyte(self):
+
+        self.mm_handle.seek(3 + self.int_size * 2)
+
+        val = self.mm_handle.read(1)
+
+        int_val = self.decode_byte(val)
+
+        print("read from ndbyte : ", int_val)
+
+        return int_val
+
+    def write_wbyte(self, val):
+
+        self.mm_handle.seek(1 + self.int_size * 2)
+        val_byte = self.uint_2_byte(val)
+        self.mm_handle.write(val_byte)
+
+    def write_rbyte(self, val):
+
+        self.mm_handle.seek(2 + self.int_size * 2)
+        val_byte = self.uint_2_byte(val)
+        self.mm_handle.write(val_byte)
+
+
+    def write_ndbyte(self, val):
+
+        self.mm_handle.seek(3 + self.int_size * 2)
+        val_byte = self.uint_2_byte(val)
+        self.mm_handle.write(val_byte)
 
     def calibrate_memorymappingfile(self):
 
@@ -48,11 +121,12 @@ class ShareMemWriter(object):
             with open(self.mmap_path, "w+b") as fopen_once:
                 content = np.arange(self.mem_file_size).astype(np.double)
                 fopen_once.write(content)
-            print(self.mmap_path)
+            #print(self.mmap_path)
             size = os.path.getsize(self.mmap_path)
             print("create file size of ", size)
 
         self.open_memory_mapping_file()
+
 
     def calibrate_int_size(self):
 
@@ -70,8 +144,8 @@ class ShareMemWriter(object):
         data_file_path = os.path.join(top_dir, "memorymapfile", "memorymap.txt")
 
         self.mmap_path = data_file_path
-        print("top dir is", top_dir)
-        print("dir name", data_file_path)
+        #print("top dir is", top_dir)
+        #print("dir name", data_file_path)
 
     def check_mem_exists(self):
 
@@ -81,6 +155,8 @@ class ShareMemWriter(object):
     def create_mapping(self):
 
         self.mm_handle = mmap.mmap(self.fshareid.fileno(), access=mmap.ACCESS_WRITE, length=self.mmap_size)
+        self.write_rbyte(0)
+        self.write_ndbyte(0)
 
     def write_string(self):
         #for test purpose
@@ -89,9 +165,11 @@ class ShareMemWriter(object):
 
     def read_data_header(self):
 
-        cur_wbyte = int(str(self.mm_handle.read(1)))
-        cur_rbyte = int(str(self.mm_handle.read(1)))
-        cur_ndbyte = int(str(self.mm_handle.read(1)))
+        self.wbyte = int(str(self.mm_handle.read(1)))
+        self.rbyte = int(str(self.mm_handle.read(1)))
+        self.ndbyte = int(str(self.mm_handle.read(1)))
+        print("current data header")
+        print([self.wbyte, self.rbyte, self.ndbyte])
 
         return 0
 
@@ -171,9 +249,40 @@ class ShareMemWriter(object):
         data_buffer = ctypes.cast(data, ctypes.POINTER(ctypes.c_int32))
         return data_buffer
 
+
     def write_data(self, data):
 
-        self.write_data_header()
+        ncount = 0
+
+        if (self.read_rbyte()== 0):
+
+                self.write_wbyte(1)
+
+                while(self.read_rbyte() == 1 or self.read_ndbyte() == 1) and ncount < 10:
+                    print("enter while loop")
+                    time.sleep(1)
+                    ncount += 1
+
+                    if(self.read_rbyte() == 0):
+
+                        break
+
+                if self.read_rbyte() == 0:
+
+                    print("start writing data ----------------")
+                    self.write_data_main(data)
+                    print("finish writing data ----------------")
+                    self.write_ndbyte(1)
+
+                self.write_wbyte(0)
+        else:
+            print("read_rbyte is not zero")
+
+
+
+    def write_data_main(self, data):
+
+        self.mm_handle.seek(1 + 2 * self.int_size + 1 * 3)
         nsz_array = len(data)
         self.mm_handle.write(self.int_2_buffer(nsz_array))
 
@@ -197,7 +306,6 @@ class ShareMemWriter(object):
                 pdim_size =self.int_2_buffer(cur_data.shape[i])
 
                 self.mm_handle.write(pdim_size) #write current dimension size
-
 
             #write data
             print("cur data type", cur_data.dtype)
@@ -249,6 +357,12 @@ class ShareMemReader(object):
 
         self.calibrate()
 
+    def uint_2_byte(self, data_uint):
+
+        result_buffer = str(data_uint).encode("utf-8")
+
+        return result_buffer
+
     def calibrate(self):
         self.get_curr_path()
         self.calibrate_memorymappingfile()
@@ -274,6 +388,68 @@ class ShareMemReader(object):
 
         #self.mm = mmap.mmap(-1, length=, prot=mmap.PROT_WRITE | mmap.PROT_READ)
 
+    def read_wbyte(self):
+
+        self.mm_handle.seek(1 + self.int_size * 2)
+
+        val = self.mm_handle.read(1)
+
+        int_val = self.decode_byte(val)
+        print("read from wbyte ----------------")
+
+        # print("read from wbyte : ", int_val)
+        print("read from wbyte : ", val)
+
+        return int_val
+
+    def read_rbyte(self):
+
+        self.mm_handle.seek(2 + self.int_size * 2)
+
+        val = self.mm_handle.read(1)
+
+        int_val = self.decode_byte(val)
+
+        print("read from rbyte : ", int_val)
+
+        print("read from rbyte : ", val)
+
+        return int_val
+
+
+    def read_ndbyte(self):
+
+        self.mm_handle.seek(3 + self.int_size * 2)
+
+        val = self.mm_handle.read(1)
+
+        int_val = self.decode_byte(val)
+
+        print("read from ndbyte : ", int_val)
+
+        return int_val
+
+
+    def write_wbyte(self, val):
+
+        self.mm_handle.seek(1 + self.int_size * 2)
+        val_byte = self.uint_2_byte(val)
+        self.mm_handle.write(val_byte)
+        self.mm_handle.flush()
+
+    def write_rbyte(self, val):
+
+        self.mm_handle.seek(2 + self.int_size * 2)
+        val_byte = self.uint_2_byte(val)
+        self.mm_handle.write(val_byte)
+        self.mm_handle.flush()
+
+    def write_ndbyte(self, val):
+
+        self.mm_handle.seek(3 + self.int_size * 2)
+        val_byte = self.uint_2_byte(val)
+        self.mm_handle.write(val_byte)
+        self.mm_handle.flush()
 
     def get_curr_path(self):
 
@@ -290,7 +466,7 @@ class ShareMemReader(object):
         temp_cont = self.mm_handle.read(self.int_size)
         data_temp_filesz = self.buffer_2_int(temp_cont)
         #print(self.mm.tell())
-        self.mmap_size = data_temp_filesz.contents.value
+        self.mmap_size = data_temp_filesz
         print("size read from memory file : ", self.mmap_size)
         self.mm_handle.close()
         self.mm_handle = None
@@ -300,13 +476,15 @@ class ShareMemReader(object):
     def char_2_int(self):
 
         o_temp = self.buffer_2_int(self.content[self.content_idx:self.content_idx + self.int_size])
-        o_value = o_temp.contents.value
+        o_value = o_temp
         self.content_idx = self.content_idx + self.int_size
         return o_value
 
     def copy_buffer(self):
+        self.mm_handle.seek(1 + self.int_size * 2 + 1 * 3)
         #here the temporarly solution is just to copy the entire buffer
         print("current pos", self.mm_handle.tell())
+
         #self.seek(4 + self.int_size * 2)
         self.data_size = self.mmap_size - 4  - self.int_size * 2
         print("data size : ", self.data_size)
@@ -325,10 +503,9 @@ class ShareMemReader(object):
 
     def buffer_2_int(self, buffer):
 
-        data_int = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_int32))
+        data_int = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_int32)).contents.value
 
         return data_int
-
 
 
     def decode_byte(self, my_byte):
@@ -359,9 +536,25 @@ class ShareMemReader(object):
         print("data retrieved", data_retrieved)
         return data_retrieved
 
+
     def read_data(self):
 
-        self.read_data_header()
+        #self.read_data_header()
+
+
+        if self.read_wbyte() == 0 and self.read_ndbyte() == 1:
+
+            self.write_rbyte(1)
+
+            data_returned = self.read_data_main()
+            return data_returned
+
+            self.write_ndbyte(0)
+            self.write_rbyte(0)
+
+
+    def read_data_main(self):
+
         self.copy_buffer()
 
         nsz_array = self.char_2_int() #get the size of array
@@ -392,7 +585,7 @@ class ShareMemReader(object):
             print("content_idx", self.content_idx)
             print("data type is : ", data_type)
             print("data size is ", data_size)
-            print("data_buffer", data_buffer)
+            #print("data_buffer", data_buffer)
 
             data_flat = self.buffer_2_data(data_buffer, data_size, data_type)
 

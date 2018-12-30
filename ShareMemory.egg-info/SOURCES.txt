@@ -1,8 +1,0 @@
-README.md
-setup.py
-ShareMemory.egg-info/PKG-INFO
-ShareMemory.egg-info/SOURCES.txt
-ShareMemory.egg-info/dependency_links.txt
-ShareMemory.egg-info/not-zip-safe
-ShareMemory.egg-info/requires.txt
-ShareMemory.egg-info/top_level.txt
