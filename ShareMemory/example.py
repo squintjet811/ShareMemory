@@ -13,7 +13,7 @@ def main():
     cur_dir = "/".join(os.path.dirname(__file__).split("/")[0: -1])
     cur_path = os.path.join(cur_dir, "sharemem.txt")
     #print("cur path is ", cur_path)
-    x = input()
+    x = input("please type w for write into memory and r for read from memory")
 
 
     if (x == "w"):
