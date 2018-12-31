@@ -19,7 +19,7 @@ def main():
     if (x == "w"):
 
 
-        data1 = np.random.randint(127, size=(352, 288, 3))
+        data1 = np.random.randint(127, size=(1600, 900, 3))
         #data2 = np.random.randint(127, size=(352, 288, 3))
         #data3 = np.random.randint(127, size=(352, 288, 3))
         #data4 = np.random.randint(127, size=(352, 288, 3))
@@ -29,7 +29,7 @@ def main():
         #smw.write_data([data1, data2, data3 ,data4])
         smw.write_data([data1])
         toc = time.time()
-        print(data1)
+        #print(data1)
         print("time consumed", (toc - tic) * 1000)
         #pdb.set_trace()
 
