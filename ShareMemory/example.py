@@ -1,7 +1,7 @@
 import numpy as np
 
-from src.MemShareSrc import ShareMemWriter
-from src.MemShareSrc import ShareMemReader
+from ShareMemory.src.MemShareSrc import ShareMemWriter
+from ShareMemory.src.MemShareSrc import ShareMemReader
 
 import os
 import time
