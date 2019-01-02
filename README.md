@@ -6,6 +6,32 @@ Generally, it took ~20ms for writing the image into the memory mapping file. <br
 and it took ~20ms for reading the image from the memory mapping file. <br />
 ## Install <br /> 
 git clone --recursive
+## Instruction <br /> 
+1. Import module
+```
+import Sharememory as sm
+```
+2. Using the constructor to inialize an object(for read and write you need different constructors)<br /> 
+For writing into share memory <br /> 
+```
+smwriter = sm.ShareMemWriter()
+```
+For reading from share memory <br /> 
+```
+smreader = sm.ShareMemReader()
+```
+Now you can read/writer with the object instances, for example if you want to write a numpy array(recommended)<br /> 
+(You have to wrap the data into a list i.e. using brackets to wrap your data)
+```
+write_data = np.arange(36).reshape(3, 4, 3)
+smwriter.write_data([write_data])
+```
+And read from another program using the ```read_data``` method<br /> 
+```
+read_data = smreader.read_data()
+```
+
+
 ## Demo <br />
 run the example.py file to see a working demo <br />
 ```
