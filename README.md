@@ -21,9 +21,10 @@ For reading from share memory <br />
 smreader = sm.ShareMemReader()
 ```
 Now you can read/writer with the object instances, for example if you want to write a numpy array(recommended)<br /> 
+(You have to wrap the data into a list i.e. using brackets to wrap your data)
 ```
 write_data = np.arange(36).reshape(3, 4, 3)
-smwriter.write_data([np_data])
+smwriter.write_data([write_data])
 ```
 And read from another program using the ```read_data``` method<br /> 
 ```
