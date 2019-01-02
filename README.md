@@ -39,6 +39,9 @@ python3 example.py
 ```
 press "w" for writing data into the memory <br />
 press "r" for reading data from the memory<br />
+## Dataheader Explaination <br />
+![GitHub Logo](/data_header_explain.png)
+Format: ![Alt Text](url)
 ## To do list <br />
 1. Replace the blocking method with python semaphore <br />
 2. Change the format of the message header <br />
