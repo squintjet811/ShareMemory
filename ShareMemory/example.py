@@ -9,13 +9,15 @@ import os
 import time
 import pdb
 
+from builtins import input 
+
 def main():
 
 
     cur_dir = "/".join(os.path.dirname(__file__).split("/")[0: -1])
     cur_path = os.path.join(cur_dir, "sharemem.txt")
     #print("cur path is ", cur_path)
-    x = raw_input("please type w for write into memory and r for read from memory")
+    x = input("please type w for write into memory and r for read from memory")
 
 
     if (x == "w"):
