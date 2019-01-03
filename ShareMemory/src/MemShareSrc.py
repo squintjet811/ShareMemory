@@ -4,14 +4,15 @@ import ctypes
 import time
 import os.path
 import os
-from .MemShareSrc_Core import MemShareBasic
+from .MemShareSrcCore import MemShareBasic
+from .MemShareInterface import MemShareInterface
 
 
-class ShareMemWriter(MemShareBasic):
+class ShareMemWriter(MemShareBasic, MemShareInterface):
 
     def __init__(self, mem_file_size = 1280 * 1280, mode = 1):
 
-        super().__init__(mode = mode)
+        MemShareBasic.__init__(self, mode = mode)
 
         self.input_data = None #input data
         #data header
@@ -20,15 +21,23 @@ class ShareMemWriter(MemShareBasic):
         self.data_size = 0
         self.mem_file_size = mem_file_size
 
-        self.calibrate_all()
+        self.calibrate()
 
-    def calibrate_all(self):
+    def calibrate(self):
 
         self.get_curr_path()
         self.calibrate_memorymappingfile()
         self.create_mapping()
         self.calibrate_int_size()
         self.initialize_share_file()
+
+    def calibrate_int_size(self):
+
+        self.int_size = ctypes.sizeof(ctypes.cast(0, ctypes.POINTER(ctypes.c_int32)))
+
+        self.mm_handle.write(str(self.int_size).encode("utf-8"))
+
+        print("set int size to : ", self.int_size)
 
 
     def initialize_share_file(self): #for the first time, the writer opens first, need some calibration
@@ -214,11 +223,11 @@ class ShareMemWriter(MemShareBasic):
 
         return 0
 
-class ShareMemReader(MemShareBasic):
+class ShareMemReader(MemShareBasic, MemShareInterface):
 
     def __init__(self, mode = 1):
 
-        super().__init__(mode = mode)
+        MemShareBasic.__init__(self, mode = mode)
 
         self.content = None
         self.content_idx = 0

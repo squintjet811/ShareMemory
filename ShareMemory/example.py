@@ -3,6 +3,8 @@ import numpy as np
 from src.MemShareSrc import ShareMemWriter
 from src.MemShareSrc import ShareMemReader
 
+#print(ShareMemWriter)
+#print(dir(ShareMemWriter))
 import os
 import time
 import pdb
@@ -13,7 +15,7 @@ def main():
     cur_dir = "/".join(os.path.dirname(__file__).split("/")[0: -1])
     cur_path = os.path.join(cur_dir, "sharemem.txt")
     #print("cur path is ", cur_path)
-    x = input("please type w for write into memory and r for read from memory")
+    x = raw_input("please type w for write into memory and r for read from memory")
 
 
     if (x == "w"):

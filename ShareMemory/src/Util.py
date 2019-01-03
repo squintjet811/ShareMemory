@@ -1,15 +1,12 @@
-from abc import ABCMeta, abstractmethod
 import ctypes
 
-class ByteIntStringConversion:
-    __metaclass__ = ABCMeta
-
-    @classmethod
+class ByteIntStringConversion(object):
+       
     def version(self):
 
         return "1.0"
 
-    @abstractmethod
+    
     #convert single int value to string
     def encode_byte(self, data_uint):
 
@@ -17,7 +14,7 @@ class ByteIntStringConversion:
 
         return result_buffer
 
-    @abstractmethod
+   
     def decode_byte(self, my_byte):
 
         my_string = str(my_byte.decode("utf_8"))
@@ -26,7 +23,7 @@ class ByteIntStringConversion:
 
         return my_val
 
-    @abstractmethod
+   
     def buffer_2_int(self, buffer):
 
         data_byte = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_int32))
@@ -36,14 +33,14 @@ class ByteIntStringConversion:
 
         return data_int
 
-    @abstractmethod
+    
     def int_2_byte(self, data_int):
 
         result_buffer = ctypes.cast(data_int, ctypes.POINTER(ctypes.c_int32))
 
         return result_buffer
 
-    @abstractmethod
+    
     def int_2_buffer(self, data):
 
         data_buffer = ctypes.cast(data, ctypes.POINTER(ctypes.c_int32))
