@@ -9,7 +9,7 @@ setup(name = 'ShareMemory',
       author_email = 'squintjet811@gmail.com',
       license = 'MIT',
       packages = find_packages("src"),
-      install_requires = ['numpy == 1.15.4'],
+      install_requires = ['numpy == 1.22.0'],
       package_data = {
            'doc' :['*.txt'] ,
            'memorymapfile' : ['*.txt'] ,
